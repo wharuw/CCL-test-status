@@ -3,7 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<style>:root{color-scheme:light}body{margin:0}[hidden]{display:none!important}</style>
+<meta name="color-scheme" content="light only">
+<meta name="supported-color-schemes" content="light">
+<style>:root{color-scheme:only light}html,body{background:#f3f5f8}body{margin:0}[hidden]{display:none!important}</style>
 <title>CCL 시험 현황판</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,20 +21,6 @@
   --lv3:#b3261e; --lv3-bg:#fbe4e1;
   --font:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#0f151e; --surface:#171f2b; --surface-2:#202a39; --line:#2b3748;
-  --fg:#e8edf4; --muted:#9aa7b9; --accent:#7fb0f0; --accent-soft:#1d2d46;
-  --lv0:#4fd1a1; --lv0-bg:#12332a;
-  --lv1:#7fb0f0; --lv1-bg:#182c4a;
-  --lv2:#f0b84a; --lv2-bg:#3a2d10;
-  --lv3:#ff8d84; --lv3-bg:#42201d; color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#0f151e; --surface:#171f2b; --surface-2:#202a39; --line:#2b3748;
-  --fg:#e8edf4; --muted:#9aa7b9; --accent:#7fb0f0; --accent-soft:#1d2d46;
-  --lv0:#4fd1a1; --lv0-bg:#12332a;
-  --lv1:#7fb0f0; --lv1-bg:#182c4a;
-  --lv2:#f0b84a; --lv2-bg:#3a2d10;
-  --lv3:#ff8d84; --lv3-bg:#42201d; color-scheme:dark}
 
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:14px;line-height:1.5;padding-inline:16px;padding-block:20px 48px}
