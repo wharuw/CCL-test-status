@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>:root{color-scheme:light}body{margin:0}[hidden]{display:none!important}</style>
+<title>CCL 시험 현황판</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
+<style>
+/* Layout: 상단 요약(상태별 건수=필터) → 센터 탭·검색·정렬 → 팀별 섹션 안에 시험 타일. 타일 하나가 "대기 건수 + 발급 예상일" 한 문장. */
+:root{
+  --bg:#f3f5f8; --surface:#ffffff; --surface-2:#eaeef4; --line:#d9dfe8;
+  --fg:#16202e; --muted:#5a6678; --accent:#1f4f8f; --accent-soft:#e3ecf8;
+  --lv0:#0f7a5a; --lv0-bg:#e0f3ec;
+  --lv1:#1f5fbf; --lv1-bg:#e3edfb;
+  --lv2:#9a5b00; --lv2-bg:#fdf0d5;
+  --lv3:#b3261e; --lv3-bg:#fbe4e1;
+  --font:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f151e; --surface:#171f2b; --surface-2:#202a39; --line:#2b3748;
+  --fg:#e8edf4; --muted:#9aa7b9; --accent:#7fb0f0; --accent-soft:#1d2d46;
+  --lv0:#4fd1a1; --lv0-bg:#12332a;
+  --lv1:#7fb0f0; --lv1-bg:#182c4a;
+  --lv2:#f0b84a; --lv2-bg:#3a2d10;
+  --lv3:#ff8d84; --lv3-bg:#42201d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f151e; --surface:#171f2b; --surface-2:#202a39; --line:#2b3748;
+  --fg:#e8edf4; --muted:#9aa7b9; --accent:#7fb0f0; --accent-soft:#1d2d46;
+  --lv0:#4fd1a1; --lv0-bg:#12332a;
+  --lv1:#7fb0f0; --lv1-bg:#182c4a;
+  --lv2:#f0b84a; --lv2-bg:#3a2d10;
+  --lv3:#ff8d84; --lv3-bg:#42201d; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:14px;line-height:1.5;padding-inline:16px;padding-block:20px 48px}
+.wrap{max-width:1120px;margin-inline:auto;display:flex;flex-direction:column;gap:18px}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+header{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:flex-end;justify-content:space-between}
+header h1{margin:0;font-size:26px;font-weight:900;letter-spacing:-.02em;text-wrap:balance}
+header p{margin:2px 0 0;color:var(--muted)}
+.stamp{text-align:right;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.stamp b{color:var(--fg);font-size:15px}
+
+.demo{background:var(--accent-soft);color:var(--fg);border-radius:8px;padding:9px 12px;font-size:13px;display:flex;gap:8px;align-items:baseline}
+.demo strong{color:var(--accent);white-space:nowrap}
+
+.summary{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.chip{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;text-align:left;display:flex;flex-direction:column;gap:2px;min-width:0}
+.chip .n{font-size:26px;font-weight:900;line-height:1.1;font-variant-numeric:tabular-nums}
+.chip .l{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.chip[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1.5px var(--accent);background:var(--accent-soft)}
+.dot{width:10px;height:10px;border-radius:50%;flex:none}
+.dot.s0{background:var(--lv0)} .dot.s1{background:var(--lv1)} .dot.s2{background:var(--lv2);border-radius:2px;transform:rotate(45deg) scale(.9)} .dot.s3{background:var(--lv3);border-radius:2px}
+.dot.all{background:var(--muted)}
+.s0 .n{color:var(--lv0)} .s1 .n{color:var(--lv1)} .s2 .n{color:var(--lv2)} .s3 .n{color:var(--lv3)}
+
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.tabs{display:flex;flex-wrap:wrap;gap:4px;background:var(--surface-2);padding:3px;border-radius:10px}
+.tabs button{border:0;background:transparent;padding:6px 12px;border-radius:8px;font-weight:500;color:var(--muted)}
+.tabs button[aria-pressed="true"]{background:var(--surface);color:var(--fg);font-weight:700;box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.spacer{flex:1}
+.field{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 10px;min-width:0}
+#q{width:200px}
+
+section.center>h2{margin:12px 0 0;font-size:13px;letter-spacing:.06em;color:var(--muted);font-weight:700;text-transform:uppercase}
+.team{margin-top:8px}
+.team h3{margin:0 0 8px;font-size:16px;font-weight:700;display:flex;align-items:baseline;gap:8px}
+.team h3 small{font-weight:400;color:var(--muted);font-size:12.5px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.tile-top{display:flex;gap:8px;align-items:flex-start;justify-content:space-between}
+.tile-top .t{min-width:0}
+.cat{font-size:12px;color:var(--muted)}
+.name{font-weight:700;font-size:15px;line-height:1.35;text-wrap:balance;overflow-wrap:anywhere}
+.star{border:0;background:transparent;font-size:20px;line-height:1;padding:2px 4px;color:var(--muted);border-radius:6px}
+.star[aria-pressed="true"]{color:var(--lv2)}
+.main{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.count{display:flex;align-items:baseline;gap:4px}
+.count b{font-size:38px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.count span{color:var(--muted);font-size:13px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-weight:700;font-size:13px;white-space:nowrap}
+.pill.s0{background:var(--lv0-bg);color:var(--lv0)} .pill.s1{background:var(--lv1-bg);color:var(--lv1)}
+.pill.s2{background:var(--lv2-bg);color:var(--lv2)} .pill.s3{background:var(--lv3-bg);color:var(--lv3)}
+.meter{display:grid;grid-template-columns:repeat(4,1fr);gap:3px}
+.meter i{height:6px;border-radius:3px;background:var(--surface-2)}
+.meter.s0 i:nth-child(-n+1){background:var(--lv0)}
+.meter.s1 i:nth-child(-n+2){background:var(--lv1)}
+.meter.s2 i:nth-child(-n+3){background:var(--lv2)}
+.meter.s3 i{background:var(--lv3)}
+.eta{display:flex;flex-direction:column;gap:0}
+.eta .d{font-size:13px;color:var(--muted)}
+.eta .date{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}
+.eta .date em{font-style:normal;font-weight:500;font-size:13px;color:var(--muted)}
+.eta .days{font-size:13px;color:var(--muted)}
+.eta .days b{color:var(--fg)}
+.warn{background:var(--lv2-bg);color:var(--lv2);border-radius:8px;padding:6px 10px;font-size:12.5px}
+.more{align-self:flex-start;border:0;background:transparent;color:var(--accent);padding:2px 0;font-size:13px;font-weight:500}
+.detail{border-top:1px dashed var(--line);padding-top:10px;display:flex;flex-direction:column;gap:8px;font-size:13px}
+.detail table{border-collapse:collapse;width:100%}
+.detail td{padding:3px 0;font-variant-numeric:tabular-nums}
+.detail td:last-child{text-align:right;color:var(--muted)}
+.detail tr.on td{font-weight:700;color:var(--fg)}
+.kv{display:flex;justify-content:space-between;gap:8px;color:var(--muted)}
+.kv b{color:var(--fg);font-weight:500;text-align:right}
+
+.empty{padding:32px;text-align:center;color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:12px}
+footer{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;gap:4px}
+
+@media (max-width:640px){
+  .summary{grid-template-columns:repeat(2,1fr)}
+  .chip.all{grid-column:1/-1;flex-direction:row;align-items:center;justify-content:space-between}
+  .stamp{text-align:left}
+  #q{width:100%}.field{flex:1}
+  header h1{font-size:22px}
+  .grid{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:no-preference){.tile{transition:border-color .15s}.tile:hover{border-color:var(--accent)}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>시험 현황판</h1>
+      <p>지금 시험을 접수하면 성적서는 언제 나올까요? 팀별 주요 시험의 대기 건수와 발급 예상일입니다.</p>
+    </div>
+    <div class="stamp">데이터 확인 <b>2026-10-08 14:16</b><br><span id="health"></span></div>
+  </header>
+
+  <div class="demo"><strong>예시 화면</strong><span>전사 확대 구상을 보여주기 위한 샘플입니다. 화학환경연구팀 소형챔버 수치는 기존 현황 페이지 값을 쓰고, 나머지 시험은 가상 데이터입니다. 시험은 팀별 주요 1~2개만 올렸습니다.</span></div>
+
+  <div class="summary" id="summary" role="group" aria-label="처리 수준별 필터"></div>
+
+  <div class="controls">
+    <div class="tabs" id="tabs" role="group" aria-label="센터 선택"></div>
+    <div class="spacer"></div>
+    <input class="field" id="q" type="search" placeholder="시험명·팀명 검색" aria-label="시험명 또는 팀명 검색">
+    <select class="field" id="sort" aria-label="정렬">
+      <option value="team">팀별로 보기</option>
+      <option value="wait">대기 많은 순</option>
+      <option value="eta">발급 빠른 순</option>
+    </select>
+  </div>
+
+  <main id="list"></main>
+
+  <footer>
+    <span>처리 수준은 시험마다 정한 대기 건수 기준으로 표시합니다. 카드의 “기준 보기”에서 확인할 수 있습니다.</span>
+    <span>발급 예상일은 지금 접수한 시료가 시험 배치에 들어가는 시점과 최근 처리 속도로 계산한 값이며, 실제 일정은 달라질 수 있습니다.</span>
+  </footer>
+</div>
+
+<script>
+var NOW = new Date(2026,9,8,14,16);
+var CENTERS = [
+  {id:'a', name:'소재평가 및 환경연구센터', short:'소재평가·환경'},
+  {id:'b', name:'광물소재연구센터', short:'광물소재'},
+  {id:'c', name:'고응력 소재성능 연구센터', short:'고응력 소재성능'}
+];
+var LV = ['원활','정상','다소 지연','상당한 지연'];
+var MARK = ['●','●','◆','■'];
+/* th: 원활/정상/다소 지연 상한 건수 */
+var T = [
+ {id:1, c:'a', team:'화학환경연구팀', cat:'건축내장재', name:'건축자재 방출량 시험 (소형챔버)', th:[22,44,69], w:26, days:18, note:'10/14 투입 배치(2채널) 기준', recent:37, chk:'14:16'},
+ {id:2, c:'a', team:'고분자재료연구팀', cat:'접착제', name:'도자기질 타일용 접착제 시험', th:[8,16,24], w:11, days:14, note:'다음 시험 시작 10/12(월)', recent:15, chk:'14:12'},
+ {id:3, c:'a', team:'고분자재료연구팀', cat:'방수재', name:'건설용 도막 방수재 시험', th:[10,20,30], w:7, days:10, note:'다음 시험 시작 10/9(금)', recent:12, chk:'14:12'},
+ {id:4, c:'a', team:'재료성능연구팀', cat:'화재 시험', name:'건축물 마감재료 화재 시험', th:[6,12,18], w:15, days:12, note:'시험 장비 2대 운영', recent:11, chk:'14:14'},
+ {id:5, c:'a', team:'재료성능연구팀', cat:'단열재', name:'단열재 열전도율 시험', th:[5,10,15], w:17, days:21, note:'장비 점검으로 처리 속도 저하', recent:16, chk:'14:14'},
+ {id:6, c:'b', team:'건설재료 연구팀', cat:'콘크리트 및 혼화재료', name:'콘크리트 공시체 시험', th:[30,60,90], w:42, days:7, note:'재령 7일·28일 시험 일정 기준', recent:7, chk:'14:10'},
+ {id:7, c:'b', team:'건설재료 연구팀', cat:'건축내외장재', name:'도자기질 타일 시험', th:[8,16,24], w:5, days:9, note:'다음 시험 시작 10/9(금)', recent:10, chk:'14:10'},
+ {id:8, c:'b', team:'토질재료 연구팀', cat:'시멘트 시험', name:'시멘트(포틀랜드·혼합) 시험', th:[10,20,30], w:23, days:12, note:'압축강도 재령 28일 포함', recent:11, chk:'14:09'},
+ {id:9, c:'b', team:'토질재료 연구팀', cat:'아스콘 시험', name:'아스팔트 콘크리트 시험', th:[6,12,18], w:3, days:5, note:'다음 시험 시작 10/9(금)', recent:6, chk:'14:09'},
+ {id:10, c:'b', team:'원재료 연구팀', cat:'골재 시험', name:'굵은 골재의 마모 시험', th:[8,16,24], w:9, days:6, note:'다음 시험 시작 10/12(월)', recent:6, chk:'14:11'},
+ {id:11, c:'b', team:'원재료 연구팀', cat:'골재 시험', name:'잔골재의 밀도 및 흡수율 시험', th:[10,20,30], w:6, days:4, note:'다음 시험 시작 10/9(금)', recent:4, chk:'14:11'},
+ {id:12, c:'c', team:'금속재료연구팀', cat:'철근', name:'철근 콘크리트용 봉강 (KS D 3504)', th:[20,40,60], w:31, days:6, note:'다음 시험 시작 10/9(금)', recent:6, chk:'14:08'},
+ {id:13, c:'c', team:'금속재료연구팀', cat:'인장', name:'금속 재료 인장 시험 (KS B 0802)', th:[20,40,60], w:14, days:3, note:'다음 시험 시작 10/9(금)', recent:3, chk:'10:40'}
+];
+var DOW = ['일','월','화','수','목','금','토'];
+function level(t){ for(var i=0;i<3;i++){ if(t.w<=t.th[i]) return i; } return 3; }
+function etaDate(t){ var d=new Date(NOW.getFullYear(),NOW.getMonth(),NOW.getDate()+t.days); return d; }
+function fmt(d){ return (d.getMonth()+1)+'/'+d.getDate()+'('+DOW[d.getDay()]+')'; }
+function stale(t){ var p=t.chk.split(':'); var m=(NOW.getHours()*60+NOW.getMinutes())-(+p[0]*60+ +p[1]); return m>=180; }
+T.forEach(function(t){ t.lv=level(t); t.stale=stale(t); t.ed=etaDate(t); });
+
+var state={lv:null,c:'all',q:'',sort:'team',open:{},pins:[1,4]};
+try{ var s=localStorage.getItem('ccl-pins'); if(s) state.pins=JSON.parse(s); }catch(e){}
+function savePins(){ try{ localStorage.setItem('ccl-pins',JSON.stringify(state.pins)); }catch(e){} }
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+function tile(t, showTeam){
+  var pinned=state.pins.indexOf(t.id)>-1, open=!!state.open[t.id];
+  var rows=['원활','정상','다소 지연','상당한 지연'].map(function(n,i){
+    var r = i===0?'0~'+t.th[0]+'건': i===1?(t.th[0]+1)+'~'+t.th[1]+'건': i===2?(t.th[1]+1)+'~'+t.th[2]+'건':(t.th[2]+1)+'건 이상';
+    return '<tr class="'+(i===t.lv?'on':'')+'"><td>'+(i===t.lv?'▶ ':'')+n+'</td><td>'+r+'</td></tr>';
+  }).join('');
+  return '<article class="tile">'+
+   '<div class="tile-top"><div class="t"><div class="cat">'+(showTeam?esc(t.team)+' · ':'')+esc(t.cat)+'</div><div class="name">'+esc(t.name)+'</div></div>'+
+   '<button class="star" data-pin="'+t.id+'" aria-pressed="'+pinned+'" aria-label="'+(pinned?'관심 시험에서 빼기':'관심 시험에 추가')+'">'+(pinned?'★':'☆')+'</button></div>'+
+   '<div class="main"><div class="count"><b>'+t.w+'</b><span>건 대기</span></div><span class="pill s'+t.lv+'">'+MARK[t.lv]+' '+LV[t.lv]+'</span></div>'+
+   '<div class="meter s'+t.lv+'" aria-hidden="true"><i></i><i></i><i></i><i></i></div>'+
+   '<div class="eta"><span class="d">지금 접수하면 성적서 발급 예상</span><span class="date">'+fmt(t.ed)+' <em>경</em></span><span class="days">약 <b>'+t.days+'일</b> 소요</span></div>'+
+   (t.stale?'<div class="warn">3시간 이상 확인되지 않았습니다. 숫자가 최신이 아닐 수 있습니다.</div>':'')+
+   '<button class="more" data-more="'+t.id+'" aria-expanded="'+open+'">'+(open?'접기':'기준 보기')+'</button>'+
+   (open?'<div class="detail"><table><tbody>'+rows+'</tbody></table>'+
+     '<div class="kv"><span>산정 기준</span><b>'+esc(t.note)+'</b></div>'+
+     '<div class="kv"><span>최근 60일 실적</span><b>접수→발급 약 '+t.recent+'일</b></div>'+
+     '<div class="kv"><span>마지막 확인</span><b>오늘 '+t.chk+'</b></div></div>':'')+
+  '</article>';
+}
+
+function visible(){
+  var q=state.q.trim().toLowerCase();
+  return T.filter(function(t){
+    if(state.lv!==null && t.lv!==state.lv) return false;
+    if(state.c!=='all' && t.c!==state.c) return false;
+    if(q && (t.name+t.team+t.cat).toLowerCase().indexOf(q)<0) return false;
+    return true;
+  });
+}
+
+function render(){
+  // summary (counts respect center + search, not level)
+  var base=T.filter(function(t){
+    var q=state.q.trim().toLowerCase();
+    return (state.c==='all'||t.c===state.c) && (!q||(t.name+t.team+t.cat).toLowerCase().indexOf(q)>-1);
+  });
+  var cnt=[0,0,0,0]; base.forEach(function(t){cnt[t.lv]++;});
+  var h='<button class="chip all" data-lv="all" aria-pressed="'+(state.lv===null)+'"><span class="l"><i class="dot all"></i>전체 시험</span><span class="n">'+base.length+'</span></button>';
+  for(var i=0;i<4;i++){
+    h+='<button class="chip s'+i+'" data-lv="'+i+'" aria-pressed="'+(state.lv===i)+'"><span class="l"><i class="dot s'+i+'"></i>'+LV[i]+'</span><span class="n">'+cnt[i]+'</span></button>';
+  }
+  document.getElementById('summary').innerHTML=h;
+
+  var th='<button data-c="all" aria-pressed="'+(state.c==='all')+'">전체</button>';
+  CENTERS.forEach(function(c){ th+='<button data-c="'+c.id+'" aria-pressed="'+(state.c===c.id)+'">'+c.short+'</button>'; });
+  document.getElementById('tabs').innerHTML=th;
+
+  var stl=T.filter(function(t){return t.stale;}).length;
+  document.getElementById('health').textContent = stl? (T.length-stl)+'개 정상 수집 · '+stl+'개 확인 지연' : '전체 정상 수집';
+
+  var list=visible(), out='';
+  if(!list.length){ out='<div class="empty">조건에 맞는 시험이 없습니다. 필터나 검색어를 바꿔 보세요.</div>'; }
+  else if(state.sort==='team'){
+    var pins=list.filter(function(t){return state.pins.indexOf(t.id)>-1;});
+    if(pins.length){
+      out+='<section class="center"><h2>★ 내 관심 시험</h2><div class="team"><div class="grid">'+pins.map(function(t){return tile(t,true);}).join('')+'</div></div></section>';
+    }
+    CENTERS.forEach(function(c){
+      var cl=list.filter(function(t){return t.c===c.id;}); if(!cl.length) return;
+      out+='<section class="center"><h2>'+c.name+'</h2>';
+      var teams=[]; cl.forEach(function(t){ if(teams.indexOf(t.team)<0) teams.push(t.team); });
+      teams.forEach(function(tm){
+        var tl=cl.filter(function(t){return t.team===tm;});
+        out+='<div class="team"><h3>'+esc(tm)+'<small>주요 시험 '+tl.length+'건</small></h3><div class="grid">'+tl.map(function(t){return tile(t,false);}).join('')+'</div></div>';
+      });
+      out+='</section>';
+    });
+  } else {
+    var s=list.slice().sort(function(a,b){ return state.sort==='wait'? b.w-a.w : a.days-b.days; });
+    out='<div class="grid">'+s.map(function(t){return tile(t,true);}).join('')+'</div>';
+  }
+  document.getElementById('list').innerHTML=out;
+}
+
+document.addEventListener('click',function(e){
+  var b=e.target.closest('button'); if(!b) return;
+  if(b.dataset.lv!==undefined){ var v=b.dataset.lv==='all'?null:+b.dataset.lv; state.lv=(state.lv===v)?null:v; }
+  else if(b.dataset.c!==undefined){ state.c=b.dataset.c; }
+  else if(b.dataset.pin){ var id=+b.dataset.pin, i=state.pins.indexOf(id); if(i>-1) state.pins.splice(i,1); else state.pins.push(id); savePins(); }
+  else if(b.dataset.more){ var k=+b.dataset.more; state.open[k]=!state.open[k]; }
+  else return;
+  render();
+});
+document.getElementById('q').addEventListener('input',function(e){ state.q=e.target.value; render(); document.getElementById('q').focus(); });
+document.getElementById('sort').addEventListener('change',function(e){ state.sort=e.target.value; render(); });
+render();
+</script>
+
+</body>
+</html>
